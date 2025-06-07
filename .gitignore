@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints
+.env
+.venv/
+*.log
+
+# Poetry
+poetry.lock
+
+# TensorFlow
+checkpoints/
+saved_model/
+*.tflite
+
+# MCU build
+mcu/build/
+*.o
+*.elf
+*.bin
+*.map
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
