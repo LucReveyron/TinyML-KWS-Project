@@ -1,16 +1,22 @@
 #include "microphone.hpp"
 
+TaskHandle_t micTaskHandle = NULL;
+
+extern int16_t shared_buffer[SAMPLE_BUFFER_SIZE];
+extern SemaphoreHandle_t buffer_mutex;
+
+// Init. Microphone I2S communication
 void setup_mic()
 {
     i2s_config_t i2s_config = {
         .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
         .sample_rate = SAMPLE_RATE,
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
-        .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
         .dma_buf_count = 4,
-        .dma_buf_len = 512,
+        .dma_buf_len = 1024,
         .use_apll = false,
         .tx_desc_auto_clear = false,
         .fixed_mclk = 0};
@@ -38,6 +44,7 @@ void setup_mic()
         i2s_zero_dma_buffer(I2S_NUM_0);
 }
 
+// Read current microphone output, use for debug
 void read_mic(int32_t* raw_samples, size_t* bytes_read)
 {
     esp_err_t ret = i2s_read(I2S_NUM_0, raw_samples, sizeof(int32_t) * SAMPLE_BUFFER_SIZE, bytes_read, portMAX_DELAY);
@@ -45,4 +52,39 @@ void read_mic(int32_t* raw_samples, size_t* bytes_read)
         Serial.printf("I2S read error: %d\n", ret);
         esp_restart();
     }
+}
+
+// Collect data of microphone
+void mic_task(void* parameter) 
+{
+  int16_t local_buffer[SAMPLE_BUFFER_SIZE];
+  size_t bytes_read = 0;
+
+  while (true) {
+    esp_err_t result = i2s_read(I2S_NUM_0, (void*)local_buffer, sizeof(local_buffer), &bytes_read, portMAX_DELAY);
+
+    if (result == ESP_OK) {
+      if (xSemaphoreTake(buffer_mutex, portMAX_DELAY)) {
+        memcpy(shared_buffer, local_buffer, sizeof(local_buffer));
+        xSemaphoreGive(buffer_mutex);
+      }
+    } 
+  else {
+    Serial.println("I2S read error");
+  }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
+void start_mic_task() 
+{
+  xTaskCreatePinnedToCore(
+    mic_task,
+    "MicTask",
+    4096,
+    NULL,
+    1,
+    &micTaskHandle,
+    1  // Run on core 1
+  );
 }
