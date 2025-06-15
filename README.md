@@ -50,21 +50,21 @@ poetry run python export_tflite.py --quantize int8 --output model.tflite
 This folder contains the firmware for the ESP-EYE board.
 Features
 
-    Real-time audio capture at 16 kHz using I2S
+- Real-time audio capture at 16 kHz using I2S
 
-    On-device MFCC feature extraction
+- On-device MFCC feature extraction
 
-    Inference with Chirale_TensorFlowLite
+- Inference with Chirale_TensorFlowLite
 
-    Recognizes predefined speech commands
+- Recognizes predefined speech commands
 
 Setup
 
-    Install PlatformIO
+- Install PlatformIO
 
-    Connect your ESP-EYE board
+- Connect your ESP-EYE board
 
-    Build and upload:
+- Build and upload:
 ```bash
 cd mcu
 pio run --target upload
