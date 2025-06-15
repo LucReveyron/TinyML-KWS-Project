@@ -7,8 +7,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-tensorflow-model-optimization = "^0.8.0"
 librosa = "^0.11.0"
+matplotlib = "^3.10.3"
+tqdm = "^4.67.1"
+seaborn = "^0.13.2"
+tensorflow = "^2.19.0"
 
 
 [tool.poetry.group.dev.dependencies]
