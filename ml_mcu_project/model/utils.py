@@ -194,6 +194,15 @@ def prepare_dataset(filenames, labels, is_training=True, batch_size=32):
 # Data augmentations
 
 def load_bg_noises(bg_noise_folder):
+    """
+    Loads background noise WAV files from a folder.
+
+    Args:
+        bg_noise_folder (str or Path): Path to the folder containing background noise .wav files.
+
+    Returns:
+        list of tuples: Each tuple contains (audio_samples, sample_rate) as (np.ndarray, int).
+    """
     noises = []
     for f in Path(bg_noise_folder).glob("*.wav"):
         samples, sr = sf.read(f)
@@ -204,6 +213,16 @@ def load_bg_noises(bg_noise_folder):
     return noises
 
 def get_random_noise_clip(noises, length):
+    """
+    Extracts a random noise segment of the specified length.
+
+    Args:
+        noises (list): A list of tuples (audio_samples, sample_rate) from load_bg_noises().
+        length (int): Desired length of the noise clip in samples.
+
+    Returns:
+        np.ndarray: A 1D array containing a noise segment of the given length.
+    """
     noise, sr = random.choice(noises)
     if len(noise) < length:
         # loop noise to make sure it's long enough
@@ -213,6 +232,20 @@ def get_random_noise_clip(noises, length):
     return noise[start_idx:start_idx + length]
 
 def mix_with_noise(speech, noise, snr_db):
+    """
+    Mixes a speech signal with background noise at a specified SNR.
+
+    Normalizes the noise, adjusts its power to achieve the desired signal-to-noise ratio, 
+    and mixes it with the speech signal.
+
+    Args:
+        speech (np.ndarray): The original speech signal.
+        noise (np.ndarray): The background noise signal.
+        snr_db (float): Desired Signal-to-Noise Ratio in decibels.
+
+    Returns:
+        np.ndarray: The mixed audio signal, clipped between -1.0 and 1.0.
+    """
     if np.max(np.abs(noise)) > 0:
         noise = noise / np.max(np.abs(noise))  # normalize
 
@@ -229,6 +262,25 @@ def mix_with_noise(speech, noise, snr_db):
 
 def augment_dataset_with_noise(train_files, train_labels, bg_noises, augmented_dir,
                                augment_factor=2, snr_range=(15, 25)):
+    """
+    Augments a dataset by adding background noise at varying SNR levels.
+
+    For each audio file, generates multiple noisy versions using random background 
+    noises and signal-to-noise ratios, then saves them to disk.
+
+    Args:
+        train_files (list of str): List of paths to clean audio files.
+        train_labels (list): Corresponding labels for the audio files.
+        bg_noises (list): List of background noises from load_bg_noises().
+        augmented_dir (str or Path): Directory where augmented audio will be saved.
+        augment_factor (int): Number of noisy samples to generate per original file.
+        snr_range (tuple): Range of SNR values (min, max) in dB for augmentation.
+
+    Returns:
+        tuple: (augmented_files, augmented_labels)
+            - augmented_files (list of str): Paths to the augmented audio files.
+            - augmented_labels (list): Corresponding labels for the augmented files.
+    """
     os.makedirs(augmented_dir, exist_ok=True)
     
     augmented_files = []
@@ -323,4 +375,3 @@ def save_confusion_matrix(model, test_ds, output_path_prefix, class_names=None):
     plt.title("Confusion Matrix")
     plt.savefig(f"{output_path_prefix}_confusion_matrix.png")
     plt.close()
-

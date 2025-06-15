@@ -31,17 +31,17 @@ def build_cnn_mfcc_model(input_shape, num_classes):
     x = layers.Conv2D(64, (3, 3), padding='same')(inputs)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.MaxPooling2D(pool_size=2, strides=2, padding='valid')(x)
 
     x = layers.Conv2D(128, (3, 3), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.MaxPooling2D(pool_size=2, strides=2, padding='valid')(x)
 
     x = layers.Conv2D(256, (3, 3), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.MaxPooling2D(pool_size=2, strides=2, padding='valid')(x)
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dropout(0.3)(x)
@@ -49,4 +49,43 @@ def build_cnn_mfcc_model(input_shape, num_classes):
     outputs = layers.Dense(num_classes, activation='softmax')(x)
 
     return tf.keras.Model(inputs, outputs)
+
+def build_cnn_lstm_mfcc_model(input_shape, num_classes):
+    """
+    CNN + LSTM hybrid model for keyword spotting.
+    
+    Args:
+        input_shape: Tuple of shape (time_steps, feature_bins)
+        num_classes: Number of output classes
+
+    Returns:
+        A compiled tf.keras.Model
+    """
+    # Input shape: (time_steps, feature_bins)
+    inputs = tf.keras.Input(shape=(*input_shape, 1))  # Add channel dimension
+
+    # 1st Conv block
+    x = layers.Conv2D(60, (10, 4), strides=(1, 1), padding='same')(inputs)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+
+    # 2nd Conv block with stride to reduce time resolution
+    x = layers.Conv2D(76, (10, 4), strides=(2, 1), padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+
+    # Reshape for LSTM: (batch, time_steps, features)
+    shape = x.shape
+    x = layers.Reshape((shape[1], shape[2] * shape[3]))(x)
+
+    # LSTM layer
+    x = layers.LSTM(58, activation='tanh', recurrent_activation='sigmoid')(x)
+
+    # Dense layer
+    x = layers.Dense(128, activation='relu')(x)
+
+    # Output
+    outputs = layers.Dense(num_classes, activation='softmax')(x)
+
+    return models.Model(inputs=inputs, outputs=outputs)
 
