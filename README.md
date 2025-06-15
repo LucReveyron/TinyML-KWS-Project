@@ -6,10 +6,7 @@ This project demonstrates speech command recognition on the [ESP-EYE](https://ww
 - `mcu/`: Embedded firmware using PlatformIO to deploy the model on ESP-EYE using [Chirale_TensorFlowLite](https://github.com/Chirale/TensorFlowLite_Micro).
 
 ## 📁 Repository Structure
-
-├── ml_mcu_project/ # Python training pipeline using Poetry
-├── mcu/ # PlatformIO project for ESP-EYE firmware
-└── README.md
+<pre lang="markdown"> ``` ├── ml_mcu_project/ # Python training pipeline using Poetry ├── mcu/ # PlatformIO project for ESP-EYE firmware └── README.md ``` </pre>
 
 
 ## 🔊 Model Training (`ml_mcu_project/`)
