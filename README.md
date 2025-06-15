@@ -1,5 +1,15 @@
 # ML MCU Project – Speech Command Recognition on ESP-EYE
 
+## ✅ Project Workflow Checklist
+
+- [x] Preprocessing dataset
+- [x] Training
+- [x] Conversion (to TFLite int8 model)
+- [x] Microphone capture on ESP-EYE
+- [ ] Embedded preprocessing (MFCC)
+- [ ] Inference on device
+
+
 This project demonstrates speech command recognition on the [ESP-EYE](https://www.espressif.com/en/products/devkits/esp-eye/overview) microcontroller. It includes two main components:
 
 - `ml_mcu_project/`: Training pipeline for a quantized speech command model using TensorFlow and the [Speech Commands Dataset](https://www.tensorflow.org/datasets/catalog/speech_commands).
