@@ -1,4 +1,4 @@
-# ML MCU Project – Speech Command Recognition on ESP-EYE
+# TinyML Keyword Spotting on ESP-EYE
 
 ## ✅ Project Workflow Checklist
 
