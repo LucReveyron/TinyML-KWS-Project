@@ -45,9 +45,9 @@ void setup_mic()
 }
 
 // Read current microphone output, use for debug
-void read_mic(int32_t* raw_samples, size_t* bytes_read)
+void read_mic(int16_t* raw_samples, size_t* bytes_read)
 {
-    esp_err_t ret = i2s_read(I2S_NUM_0, raw_samples, sizeof(int32_t) * SAMPLE_BUFFER_SIZE, bytes_read, portMAX_DELAY);
+    esp_err_t ret = i2s_read(I2S_NUM_0, raw_samples, sizeof(int16_t) * SAMPLE_BUFFER_SIZE, bytes_read, portMAX_DELAY);
     if (ret != ESP_OK) {
         Serial.printf("I2S read error: %d\n", ret);
         esp_restart();

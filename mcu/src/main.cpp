@@ -162,8 +162,9 @@ void loop()
     memmove(audio_window, audio_window + kWindowStep, (kWindowSize - kWindowStep) * sizeof(int16_t));
 
     for (int i = 0; i < kWindowStep; ++i) {
-        int32_t s = shared_buffer[i];
-        audio_window[kWindowSize - kWindowStep + i] = static_cast<int16_t>(max(min(s, 32767), -32768));
+        int16_t s = shared_buffer[i];
+        int clamped = std::max(std::min(static_cast<int>(s), 32767), -32768);
+        audio_window[kWindowSize - kWindowStep + i] = static_cast<int16_t>(clamped);
       }
 
       xSemaphoreGive(buffer_mutex);
@@ -183,6 +184,13 @@ void loop()
 
       // Compute MFCC coefficients from mel bins
       ComputeDCT(mel, mfcc_out, kNumMelBins, kNumMfccCoeffs);
+
+      Serial.print("MFCC input : [");
+      for (int i = 0; i < kNumMfccCoeffs; ++i) {
+        Serial.print(mfcc_out[i], 4);  // Print with 4 decimal places
+        if (i < kNumMfccCoeffs - 1) Serial.print(", ");
+      }
+      Serial.println("]");
 
       // Quantize MFCC and store in input tensor slice at feature_index
       QuantParams q = GetInputQuantParams();
